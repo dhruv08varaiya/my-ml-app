@@ -91,4 +91,13 @@ input_df = pd.DataFrame([input_dict])
 # --- Prediction ---
 if st.button("🚀 Predict Now"):
     prediction = model.predict(input_df)
-    st.success(f"🎯 The estimated EV price: ₹{prediction[0]:,.2f}")
+    intent_score = prediction[0]
+    st.success(f"🚘 EV Purchase Intent Score: {intent_score:.2f}")
+    
+    if intent_score >= 0.75:
+        st.info("🔥 This user is highly likely to purchase a Tesla EV.")
+    elif intent_score >= 0.5:
+        st.info("⚡ This user shows moderate interest in purchasing a Tesla EV.")
+    else:
+        st.info("❄️ This user currently shows low intent to purchase a Tesla EV.")
+
