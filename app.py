@@ -5,7 +5,7 @@ import joblib
 # Load the trained model
 model = joblib.load('model.pkl')
 
-# List of selected features (in exact order used during training)
+# List of features used in training
 selected_features = [
     'Location_State_Assam', 'Location_State_Bihar', 'Location_State_Delhi',
     'Location_State_Jharkhand', 'Location_State_Karnataka',
@@ -22,38 +22,49 @@ selected_features = [
     'Daily_Commute_Distance', 'Electricity_Cost'
 ]
 
+st.set_page_config(page_title="EV Purchase Predictor", page_icon="🚗")
 st.title("🚗 EV Purchase Prediction App")
+st.markdown("👋 **Welcome! Fill out the information below to get a prediction related to electric vehicle purchase behavior.**")
 
-# Create input widgets for each feature
-st.subheader("Fill in the details below:")
+# --- Inputs ---
 
-# Binary or categorical inputs converted to one-hot encoding style
-location_state = st.selectbox("Select State", [
+location_state = st.selectbox("📍 Which Indian state are you from?", [
     'Assam', 'Bihar', 'Delhi', 'Jharkhand', 'Karnataka',
     'Madhya Pradesh', 'Maharashtra', 'Punjab', 'Telangana',
     'Uttar Pradesh', 'West Bengal'
 ])
-urban_rural = st.selectbox("Urban or Rural", ['Urban', 'Rural'])
-vehicle_ownership = st.selectbox("Do you own a Two-Wheeler?", ['Yes', 'No'])
-ev_awareness = st.selectbox("EV Awareness", ['High', 'Low', 'Medium'])
-charging_access = st.multiselect("Charging Access Available at:", ['Public', 'Work'])
-brand_perception = st.selectbox("Brand Perception", ['Positive', 'Neutral', 'Negative'])
-import_duty_impact = st.selectbox("Impact of Import Duty", ['High', 'Low', 'Medium'])
-competitor_preference = st.selectbox("Preferred Competitor", ['Hyundai', 'Other'])
-environmental_concern = st.selectbox("Environmental Concern", ['High', 'Low'])
 
-# Numeric inputs
-age = st.number_input("Your Age", min_value=18, max_value=100)
-income = st.number_input("Annual Income (in ₹)", min_value=0)
-purchase_intent = st.slider("Purchase Intent (0 = Low, 1 = High)", 0.0, 1.0, 0.5)
-price_sensitivity = st.slider("Price Sensitivity (0 = Low, 1 = High)", 0.0, 1.0, 0.5)
-daily_commute = st.number_input("Daily Commute Distance (km)", min_value=0.0)
-electricity_cost = st.number_input("Electricity Cost (₹ per unit)", min_value=0.0)
+urban_rural = st.radio("🏠 What type of area do you live in?", ['Urban', 'Rural'])
 
-# Prepare a dictionary for the input row
+vehicle_ownership = st.radio("🛵 Do you currently own a two-wheeler?", ['Yes', 'No'])
+
+ev_awareness = st.selectbox("💡 How aware are you about electric vehicles?", ['High', 'Low', 'Medium'])
+
+charging_access = st.multiselect("🔌 Where do you have EV charging access?", ['Public', 'Work'])
+
+brand_perception = st.selectbox("🏷️ How do you feel about EV brands in India?", ['Positive', 'Neutral', 'Negative'])
+
+import_duty_impact = st.radio("📦 How much does import duty impact your decision?", ['High', 'Low', 'Medium'])
+
+competitor_preference = st.radio("🚘 If not Tesla, which brand would you prefer?", ['Hyundai', 'Other'])
+
+environmental_concern = st.radio("🌱 How concerned are you about the environment?", ['High', 'Low'])
+
+age = st.number_input("🎂 What is your age?", min_value=18, max_value=100)
+
+income = st.number_input("💰 What is your estimated annual income (₹)?", min_value=0)
+
+purchase_intent = st.slider("🛍️ How likely are you to buy an EV? (0 = Not likely, 1 = Very likely)", 0.0, 1.0, 0.5)
+
+price_sensitivity = st.slider("💸 How sensitive are you to price? (0 = Not at all, 1 = Very sensitive)", 0.0, 1.0, 0.5)
+
+daily_commute = st.number_input("🚗 Average daily commute distance (km)", min_value=0.0)
+
+electricity_cost = st.number_input("⚡ What is your local electricity cost (₹ per unit)?", min_value=0.0)
+
+# --- Feature Mapping ---
+
 input_dict = {feature: 0 for feature in selected_features}
-
-# Set one-hot values
 input_dict[f'Location_State_{location_state}'] = 1
 input_dict[f'Urban_Rural_{urban_rural}'] = 1
 input_dict['Vehicle_Ownership_Two-Wheeler'] = 1 if vehicle_ownership == 'Yes' else 0
@@ -67,8 +78,6 @@ input_dict['Import_Duty_Impact_High'] = 1 if import_duty_impact == 'High' else 0
 input_dict['Import_Duty_Impact_Low'] = 1 if import_duty_impact == 'Low' else 0
 input_dict['Competitor_Preference_Hyundai'] = 1 if competitor_preference == 'Hyundai' else 0
 input_dict['Environmental_Concern_High'] = 1 if environmental_concern == 'High' else 0
-
-# Set numeric values
 input_dict['Age'] = age
 input_dict['Income_Annual'] = income
 input_dict['Purchase_Intent'] = purchase_intent
@@ -79,7 +88,7 @@ input_dict['Electricity_Cost'] = electricity_cost
 # Convert to DataFrame
 input_df = pd.DataFrame([input_dict])
 
-# Predict and show result
-if st.button("🚀 Predict"):
+# --- Prediction ---
+if st.button("🚀 Predict Now"):
     prediction = model.predict(input_df)
-    st.success(f"🎯 Predicted Output: {prediction[0]:.2f}")
+    st.success(f"🎯 The estimated EV price: ₹{prediction[0]:,.2f}")
